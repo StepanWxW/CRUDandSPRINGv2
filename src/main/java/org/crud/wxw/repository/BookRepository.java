@@ -1,7 +1,7 @@
 package org.crud.wxw.repository;
 
-import org.crud.wxw.entity.BookEntity;
 import org.crud.wxw.model.Book;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BookRepository extends GenericRepository<BookEntity, Long>{
+public interface BookRepository extends JpaRepository<Book, Long> {
 }

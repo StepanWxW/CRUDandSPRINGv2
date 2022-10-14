@@ -22,12 +22,12 @@ public class PersonController {
 
     @GetMapping
     public String getAll(Model model){
-    model.addAttribute("people", personService.getAll());
+    model.addAttribute("people", personService.findAll());
         return "person/people";
     }
     @GetMapping("/{id}")
     public String getId(@PathVariable("id") Long id, Model model) {
-        model.addAttribute("person", personService.getById(id));
+        model.addAttribute("person", personService.findById(id));
         model.addAttribute("books", bookService.getBooksByPersonId(id));
         return "person/person";
     }
@@ -37,17 +37,17 @@ public class PersonController {
     }
     @PostMapping
     public String create(@ModelAttribute ("person") Person person){
-        personService.create(person);
+        personService.save(person);
         return "redirect:/people";
     }
     @GetMapping("/{id}/edit")
     public String edit(Model model, @PathVariable("id") Long id){
-        model.addAttribute("person", personService.getById(id));
+        model.addAttribute("person", personService.findById(id));
         return "person/edit";
     }
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") Person person, @PathVariable("id") Long id) {
-        personService.update(person);
+        personService.update(id, person);
         return "redirect:/people";
     }
     @DeleteMapping("/{id}")

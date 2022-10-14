@@ -37,7 +37,7 @@ public class BookController {
         if(bookOwner != null) {
             model.addAttribute("owner", bookOwner);
         } else {
-            model.addAttribute("people", personService.getAll());
+            model.addAttribute("people", personService.findAll());
         }
         return "book/book";
     }
@@ -47,7 +47,7 @@ public class BookController {
     }
     @PostMapping
     public String create(@ModelAttribute ("book") Book book){
-        bookService.create(book);
+        bookService.save(book);
         return "redirect:/books";
     }
     @GetMapping("/{id}/edit")
@@ -57,7 +57,7 @@ public class BookController {
     }
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("book") Book book, @PathVariable("id") Long id) {
-        bookService.update(book);
+        bookService.update(id, book);
         return "redirect:/books";
     }
     @DeleteMapping("/{id}")
@@ -74,7 +74,7 @@ public class BookController {
     public String assign(@PathVariable("id") Long id, @ModelAttribute("person") Person personSelect) {
         Book book = bookService.getById(id);
         book.setPerson(personSelect);
-        bookService.update(book);
+        bookService.update(id, book);
         return "redirect:/books/" +id;
     }
 }

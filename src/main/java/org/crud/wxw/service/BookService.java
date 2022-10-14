@@ -1,70 +1,68 @@
 package org.crud.wxw.service;
 
-import jakarta.persistence.EntityNotFoundException;
-import org.crud.wxw.entity.BookEntity;
-import org.crud.wxw.entity.PersonEntity;
-import org.crud.wxw.mapper.BookMapper;
-import org.crud.wxw.mapper.PersonMapper;
+
 import org.crud.wxw.model.Book;
 import org.crud.wxw.model.Person;
-import org.crud.wxw.repository.impl.BookRepositoryImpl;
-import org.hibernate.Session;
-import org.springframework.stereotype.Component;
+import org.crud.wxw.repository.BookRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
-@Component
+@Service
+@Transactional(readOnly = true)
 public class BookService {
-     private BookRepositoryImpl bookRepository = new BookRepositoryImpl();
-     private BookMapper bookMapper = new BookMapper();
 
-    public BookService() {
+    private final BookRepository bookRepository;
 
+    @Autowired
+    public BookService(BookRepository bookRepository) {
+
+        this.bookRepository = bookRepository;
     }
 
-
-    public BookEntity create(Book book) {
-        BookEntity bookEntity = bookMapper.toModelEntity(book);
-        bookRepository.create(bookEntity);
-        return bookEntity;
+    @Transactional
+    public Book save(Book book) {
+        bookRepository.save(book);
+        return book;
     }
 
     public List<Book> getAll() {
-        return bookRepository.getAll().stream().map(BookMapper::toModel).collect(Collectors.toList());
+        return bookRepository.findAll();
     }
 
     public Book getById(Long id) {
-        return bookMapper.toModel(bookRepository.getById(id));
+        return bookRepository.findById(id).orElse(null);
     }
-    public BookEntity update(Book book) {
-        return bookRepository.update(bookMapper.toModelEntity(book));
+    @Transactional
+    public void update(Long id, Book book) {
+        Book bookToBeUpdated = bookRepository.findById(id).get();
+        book.setId(id);
+        bookToBeUpdated.setPerson(bookToBeUpdated.getPerson());
+        bookRepository.save(bookToBeUpdated);
     }
-
+    @Transactional
     public void delete(Long id) {
-        bookRepository.delete(id);
-    }
-
-    public BookService(BookRepositoryImpl bookRepository, BookMapper bookMapper) {
-        this.bookRepository = bookRepository;
-        this.bookMapper = bookMapper;
+        bookRepository.deleteById(id);
     }
 
     public List<Book> getBooksByPersonId(Long id) {
-        List<BookEntity> bookEntities = bookRepository.getAll().stream().
-                filter((p) -> p.getPersonEntity() != null && Objects.equals(p.getPersonEntity().getId(), id)).toList();
-        return bookEntities.stream().map(BookMapper::toModel).collect(Collectors.toList());
+        return bookRepository.findAll().stream().
+                filter((p) -> p.getPerson() != null && Objects.equals(p.getPerson().getId(), id)).toList();
     }
 
+
     public Person getBookOwner(Long id) {
-        PersonEntity personEntity = bookRepository.getById(id).getPersonEntity();
-        if (personEntity != null) {
-            return PersonMapper.toModel(bookRepository.getById(id).getPersonEntity());
-        }
-        return null;
+        return bookRepository.findById(id).map(Book::getPerson).orElse(null);
     }
+    @Transactional
     public void release(Long id) {
-        bookRepository.release(id);
+        bookRepository.findById(id).ifPresent(
+                book -> {
+                    book.setPerson(null);
+                });
     }
 }

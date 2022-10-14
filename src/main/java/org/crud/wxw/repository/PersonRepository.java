@@ -1,8 +1,8 @@
 package org.crud.wxw.repository;
 
 
-import org.crud.wxw.entity.PersonEntity;
 import org.crud.wxw.model.Person;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PersonRepository extends GenericRepository<PersonEntity,Long> {
+public interface PersonRepository extends JpaRepository<Person,Long> {
 }
